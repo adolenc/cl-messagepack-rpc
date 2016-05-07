@@ -5,11 +5,11 @@
 ; * (ql:quickload :cl-messagepack-rpc)
 ; * (defparameter *loop* (el:init))
 ; * (defparameter *socket* (el:add-listener *loop* #'el:handle-msg :host "127.0.0.1" :port 9090))
-; * (el:send *loop* *socket* (format nil "shit~c" #\newline))
+; * (el:send *loop* *socket* (format nil "wow~c" #\newline))
 
 ; (as:with-event-loop ()
 ;   (let ((sock (as:tcp-connect "127.0.0.1" 9090 #'handle-new-msg :data (format nil "GET /~c~c" #\return #\newline))))
-;     (as:delay (lambda () (as:write-socket-data sock (format nil "SHIT~c" #\newline) :force T)) :time 3)))
+;     (as:delay (lambda () (as:write-socket-data sock (format nil "whoa~c" #\newline) :force T)) :time 3)))
 
 
 (defmacro with-event-loop-bindings ((event-base) &body body)
@@ -20,18 +20,17 @@
          (as::*function-registry* (as::event-base-function-registry ,event-base)))
      ,@body))
 
-(defparameter *loop-pointer* NIL)
 (defparameter *requests* (make-hash-table))
 
 (defun init ()
-  (setf *loop-pointer* (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size)))
-  (uv:uv-loop-init *loop-pointer*)
-  (make-instance
-    'as::event-base
-    :c *loop-pointer*
-    :id 0
-    :catch-app-errors NIL
-    :send-errors-to-eventcb t))
+  (let ((loop-pointer (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size))))
+    (uv:uv-loop-init loop-pointer)
+    (make-instance
+      'as::event-base
+      :c loop-pointer
+      :id 0
+      :catch-app-errors NIL
+      :send-errors-to-eventcb t)))
 
 (defun add-listener (event-base callback &key host port file)
   (flet ((clean-callback (socket data)
@@ -67,7 +66,6 @@
 (defun clean (event-base)
   (with-event-loop-bindings (event-base)
     (as::do-close-loop (as::event-base-c as::*event-base*))
-    (static-vectors:free-static-vector as::*output-buffer*) ; TODO: not imported
+    (static-vectors:free-static-vector as::*output-buffer*)
     (static-vectors:free-static-vector as::*input-buffer*)
-    (free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)
-    (cffi:foreign-free *loop-pointer*)))
+    (as::free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)))
