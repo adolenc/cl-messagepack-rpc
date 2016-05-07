@@ -1,0 +1,73 @@
+(in-package #:event-loop)
+
+
+; $ ncat -l 9090 -k -c 'xargs -n1 echo'
+; * (ql:quickload :cl-messagepack-rpc)
+; * (defparameter *loop* (el:init))
+; * (defparameter *socket* (el:add-listener *loop* #'el:handle-msg :host "127.0.0.1" :port 9090))
+; * (el:send *loop* *socket* (format nil "shit~c" #\newline))
+
+; (as:with-event-loop ()
+;   (let ((sock (as:tcp-connect "127.0.0.1" 9090 #'handle-new-msg :data (format nil "GET /~c~c" #\return #\newline))))
+;     (as:delay (lambda () (as:write-socket-data sock (format nil "SHIT~c" #\newline) :force T)) :time 3)))
+
+
+(defmacro with-event-loop-bindings ((event-base) &body body)
+  `(let ((as::*event-base* ,event-base)
+         (as::*output-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
+         (as::*input-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
+         (as::*data-registry* (as::event-base-data-registry ,event-base))
+         (as::*function-registry* (as::event-base-function-registry ,event-base)))
+     ,@body))
+
+(defparameter *loop-pointer* NIL)
+(defparameter *requests* (make-hash-table))
+
+(defun init ()
+  (setf *loop-pointer* (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size)))
+  (uv:uv-loop-init *loop-pointer*)
+  (make-instance
+    'as::event-base
+    :c *loop-pointer*
+    :id 0
+    :catch-app-errors NIL
+    :send-errors-to-eventcb t))
+
+(defun add-listener (event-base callback &key host port file)
+  (flet ((clean-callback (socket data)
+           (declare (ignore socket))
+           (funcall callback data)))
+  (with-event-loop-bindings (event-base)
+    (if (or host port file)
+      (cond (file            (as:pipe-connect file #'clean-callback))
+            ((and host port) (as:tcp-connect host port #'clean-callback))
+            (t (error "You must specify both host and port.")))
+      (run-io-listener)))))
+
+(defun run-once (event-base)
+  (with-event-loop-bindings (event-base)
+    (uv:uv-run (as::event-base-c event-base) (cffi:foreign-enum-value 'uv:uv-run-mode :run-once))))
+
+(defun run-forever (event-base)
+  (with-event-loop-bindings (event-base)
+    (uv:uv-run (as::event-base-c event-base) (cffi:foreign-enum-value 'uv:uv-run-mode :run-default))))
+
+(defun send (event-base socket msg)
+  (with-event-loop-bindings (event-base)
+    (let ((future (make-instance 'future :loop event-base)))
+      (setf (gethash (char-code (elt msg 0)) *requests*) future)
+      (as:write-socket-data socket msg :force t)
+      (prog1 (join future)
+        (remhash (char-code (elt msg 0)) *requests*)))))
+
+(defun handle-msg (data)
+  (if (gethash (elt data 0) *requests*)
+    (finish (gethash (elt data 0) *requests*) :result (map 'string #'code-char data))))
+
+(defun clean (event-base)
+  (with-event-loop-bindings (event-base)
+    (as::do-close-loop (as::event-base-c as::*event-base*))
+    (static-vectors:free-static-vector as::*output-buffer*) ; TODO: not imported
+    (static-vectors:free-static-vector as::*input-buffer*)
+    (free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)
+    (cffi:foreign-free *loop-pointer*)))

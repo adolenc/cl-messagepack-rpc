@@ -1,0 +1,18 @@
+(in-package #:event-loop)
+
+
+(defclass future ()
+  ((finished :initarg :finished :accessor finishedp :initform NIL)
+   (result :initarg :result :accessor result :initform NIL)
+   (err :initarg :error :accessor err :initform NIL)
+   (event-loop :initarg :loop :accessor event-loop :initform (error "Must specify event-loop to use."))))
+
+(defmethod finish ((future future) &key result err)
+  (setf (finishedp future) T
+        (result future) result
+        (err future) err))
+
+(defmethod join ((future future))
+  (while (not (finishedp future))
+    (run-once (event-loop future)))
+  (result future))
