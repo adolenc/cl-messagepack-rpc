@@ -5,7 +5,7 @@
   ((finished :initarg :finished :accessor finishedp :initform NIL)
    (result :initarg :result :accessor result :initform NIL)
    (err :initarg :error :accessor err :initform NIL)
-   (event-loop :initarg :loop :accessor event-loop :initform (error "Must specify event-loop to use."))))
+   (event-loop :initarg :event-loop :accessor event-loop :initform (error "Must specify event-loop to use."))))
 
 (defmethod finish ((future future) &key result err)
   (setf (finishedp future) T

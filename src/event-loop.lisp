@@ -11,7 +11,6 @@
 ;   (let ((sock (as:tcp-connect "127.0.0.1" 9090 #'handle-new-msg :data (format nil "GET /~c~c" #\return #\newline))))
 ;     (as:delay (lambda () (as:write-socket-data sock (format nil "whoa~c" #\newline) :force T)) :time 3)))
 
-
 (defmacro with-event-loop-bindings ((event-base) &body body)
   `(let ((as::*event-base* ,event-base)
          (as::*output-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
@@ -19,8 +18,6 @@
          (as::*data-registry* (as::event-base-data-registry ,event-base))
          (as::*function-registry* (as::event-base-function-registry ,event-base)))
      ,@body))
-
-(defparameter *requests* (make-hash-table))
 
 (defun init ()
   (let ((loop-pointer (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size))))
@@ -53,15 +50,7 @@
 
 (defun send (event-base socket msg)
   (with-event-loop-bindings (event-base)
-    (let ((future (make-instance 'future :loop event-base)))
-      (setf (gethash (char-code (elt msg 0)) *requests*) future)
-      (as:write-socket-data socket msg :force t)
-      (prog1 (join future)
-        (remhash (char-code (elt msg 0)) *requests*)))))
-
-(defun handle-msg (data)
-  (if (gethash (elt data 0) *requests*)
-    (finish (gethash (elt data 0) *requests*) :result (map 'string #'code-char data))))
+    (as:write-socket-data socket msg :force t)))
 
 (defun clean (event-base)
   (with-event-loop-bindings (event-base)
