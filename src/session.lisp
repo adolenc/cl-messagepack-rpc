@@ -48,7 +48,8 @@
   (apply #'call session method params))
 
 (defmethod notify ((session session) method &rest params)
-  (send-notification session method (or params #())))
+  (send-notification session method (or params #()))
+  T)
 
 (defmethod on-message ((session session) message)
   (format t "RECEIVED ~A, id=~A~%" message (elt message 1))
