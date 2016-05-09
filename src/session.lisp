@@ -23,8 +23,8 @@
 
 
 (defmethod register-callback ((session session) method callback)
-  "Register a CALLBACK which will get called when server sends
-   request or notification for METHOD."
+  "Register a callback which will get called when server sends
+   request or notification for method."
   (setf (gethash method (callbacks session)) callback))
 
 (defmethod remove-callback ((session session) method)

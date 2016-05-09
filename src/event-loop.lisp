@@ -22,21 +22,29 @@
 (defun init ()
   (let ((loop-pointer (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size))))
     (uv:uv-loop-init loop-pointer)
-    (make-instance
-      'as::event-base
-      :c loop-pointer
-      :id 0
-      :catch-app-errors NIL
-      :send-errors-to-eventcb t)))
+    (let ((event-loop (make-instance
+                       'as::event-base
+                       :c loop-pointer
+                       :id 0
+                       :catch-app-errors NIL
+                       :send-errors-to-eventcb T)))
+      (with-event-loop-bindings (event-loop)
+        (as:signal-handler 2 #'(lambda (sig)
+                                 (declare (ignore sig))
+                                 (clean event-loop "Event loop exited.")))
+        event-loop))))
 
 (defun add-listener (event-base callback &key host port file)
   (flet ((clean-callback (socket data)
            (declare (ignore socket))
-           (funcall callback data)))
+           (funcall callback data))
+         (on-connection-close (ev)
+           (declare (ignore ev))
+           (clean event-base "Connection closed!")))
   (with-event-loop-bindings (event-base)
     (if (or host port file)
-      (cond (file            (as:pipe-connect file #'clean-callback))
-            ((and host port) (as:tcp-connect host port #'clean-callback))
+      (cond (file            (as:pipe-connect file #'clean-callback :event-cb #'on-connection-close))
+            ((and host port) (as:tcp-connect host port #'clean-callback :event-cb #'on-connection-close))
             (t (error "You must specify both host and port.")))
       (run-io-listener)))))
 
@@ -52,9 +60,11 @@
   (with-event-loop-bindings (event-base)
     (as:write-socket-data socket msg :force t)))
 
-(defun clean (event-base)
+(defun clean (event-base &optional with-error)
   (with-event-loop-bindings (event-base)
+    (as:exit-event-loop)
     (as::do-close-loop (as::event-base-c as::*event-base*))
-    (static-vectors:free-static-vector as::*output-buffer*)
-    (static-vectors:free-static-vector as::*input-buffer*)
-    (as::free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)))
+    ; (static-vectors:free-static-vector as::*output-buffer*)
+    ; (static-vectors:free-static-vector as::*input-buffer*)
+    (as::free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)
+    (if with-error (error with-error))))
