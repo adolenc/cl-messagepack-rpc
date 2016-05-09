@@ -1,4 +1,4 @@
-(in-package #:cl-messagepack-rpc)
+(in-package #:messagepack-rpc)
 
 
 (defmacro define-rpc-type (type-name type-id &rest components)

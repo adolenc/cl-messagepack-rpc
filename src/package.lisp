@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 
-(defpackage #:cl-messagepack-rpc.utils
+(defpackage #:messagepack-rpc.utils
   (:use #:cl)
   ;; utils.lisp
   (:export #:while
@@ -14,7 +14,7 @@
         #:bordeaux-threads 
         #:cffi
         #:cl-async
-        #:cl-messagepack-rpc.utils)
+        #:messagepack-rpc.utils)
   (:import-from #:libuv #:uv-run-mode #:uv-run)
   ;; event-loop.lisp
   (:export #:init
@@ -31,13 +31,13 @@
            #:finish
            #:join))
 
-(defpackage #:cl-messagepack-rpc
+(defpackage #:messagepack-rpc
   (:nicknames #:mrpc)
   (:use #:cl
         #:messagepack
         #:flexi-streams
         #:event-loop
-        #:cl-messagepack-rpc.utils)
+        #:messagepack-rpc.utils)
   ;; cl-messagepack
   (:export #:*extended-types*)
   ;; session.lisp

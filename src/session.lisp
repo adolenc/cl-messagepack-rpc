@@ -1,4 +1,4 @@
-(in-package #:cl-messagepack-rpc)
+(in-package #:messagepack-rpc)
 
 
 (defparameter *max-request-id* 0)

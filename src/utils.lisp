@@ -1,4 +1,4 @@
-(in-package #:cl-messagepack-rpc.utils)
+(in-package #:messagepack-rpc.utils)
 
 
 (defun symbol-concat (&rest symbols)
