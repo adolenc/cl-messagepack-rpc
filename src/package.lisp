@@ -35,6 +35,7 @@
   (:nicknames #:mrpc)
   (:use #:cl
         #:messagepack
+        #:flexi-streams
         #:event-loop
         #:cl-messagepack-rpc.utils)
   ;; cl-messagepack

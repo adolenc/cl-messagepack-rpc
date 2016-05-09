@@ -13,8 +13,6 @@
 
 (defmacro with-event-loop-bindings ((event-base) &body body)
   `(let ((as::*event-base* ,event-base)
-         (as::*output-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
-         (as::*input-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
          (as::*data-registry* (as::event-base-data-registry ,event-base))
          (as::*function-registry* (as::event-base-function-registry ,event-base)))
      ,@body))
@@ -68,3 +66,6 @@
     ; (static-vectors:free-static-vector as::*input-buffer*)
     (as::free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)
     (if with-error (error with-error))))
+
+(setf as::*output-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
+(setf as::*input-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))

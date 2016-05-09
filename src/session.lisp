@@ -14,7 +14,9 @@
 
 (defmethod initialize-instance :after ((session session) &key host port file)
   (flet ((callback-handler (data)
-           (on-message session (mpk:decode data))))
+           (flexi-streams:with-input-from-sequence (stream data)
+             (while (listen stream)
+               (on-message session (mpk:decode-stream stream))))))
     (setf (socket session) (el:add-listener (event-loop session) #'callback-handler :host host :port port :file file))))
 
 (define-rpc-type request 0 msg-id msg-method msg-params)
@@ -32,16 +34,19 @@
   (remhash method (callbacks session)))
 
 (defmethod request ((session session) method &rest params)
-  (let ((future (make-instance 'el:future :event-loop (event-loop session)))
-        (request-id (get-unique-request-id)))
+  (let* ((request-id (get-unique-request-id))
+        (future (make-instance 'el:future :event-loop (event-loop session) :id request-id)))
+    (format t "Sending request ~A for ~A~%" request-id method)
     (setf (gethash request-id (active-requests session)) future)
     (send-request session request-id method (or params #()))
-    (prog1 (join future)
-      (remhash request-id (active-requests session)))))
+    (finish future)))
 
 (defmethod notify ((session session) method &rest params)
   (send-notification session method (or params #())))
 
 (defmethod on-message ((session session) message)
   (format t "RECEIVED ~A, id=~A~%" message (elt message 1))
-  (finish (gethash (elt message 1) (active-requests session)) :result T))
+  (let* ((request-id (elt message 1))
+         (future (gethash request-id (active-requests session))))
+    (remhash request-id (active-requests session))
+    (finish future :result T)))
