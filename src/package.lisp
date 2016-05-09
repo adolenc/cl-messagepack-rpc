@@ -44,5 +44,7 @@
   (:export #:session
            #:register-callback
            #:remove-callback
+           #:call
+           #:call-async
            #:request
            #:notify))

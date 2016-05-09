@@ -33,13 +33,19 @@
   "Remove a registered callback."
   (remhash method (callbacks session)))
 
-(defmethod request ((session session) method &rest params)
+(defmethod call-async ((session session) method &rest params)
   (let* ((request-id (get-unique-request-id))
         (future (make-instance 'el:future :event-loop (event-loop session) :id request-id)))
     (format t "Sending request ~A for ~A~%" request-id method)
     (setf (gethash request-id (active-requests session)) future)
     (send-request session request-id method (or params #()))
-    (finish future)))
+    future))
+
+(defmethod call ((session session) method &rest params)
+  (join (apply #'call-async session method params)))
+
+(defmethod request ((session session) method &rest params)
+  (apply #'call session method params))
 
 (defmethod notify ((session session) method &rest params)
   (send-notification session method (or params #())))
