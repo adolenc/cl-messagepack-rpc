@@ -35,12 +35,12 @@
   (let ((future (make-instance 'el:future :event-loop (event-loop session)))
         (request-id (get-unique-request-id)))
     (setf (gethash request-id (active-requests session)) future)
-    (send-request session request-id method params)
+    (send-request session request-id method (or params #()))
     (prog1 (join future)
       (remhash request-id (active-requests session)))))
 
 (defmethod notify ((session session) method &rest params)
-  (send-notification session method params))
+  (send-notification session method (or params #())))
 
 (defmethod on-message ((session session) message)
   (format t "RECEIVED ~A, id=~A~%" message (elt message 1))
