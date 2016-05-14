@@ -1,29 +1,22 @@
 (in-package #:event-loop)
 
 
-; $ ncat -l 9090 -k -c 'xargs -n1 echo'
-; * (ql:quickload :cl-messagepack-rpc)
-; * (defparameter *loop* (el:init))
-; * (defparameter *socket* (el:add-listener *loop* #'el:handle-msg :host "127.0.0.1" :port 9090))
-; * (el:send *loop* *socket* (format nil "wow~c" #\newline))
-
-; (as:with-event-loop ()
-;   (let ((sock (as:tcp-connect "127.0.0.1" 9090 #'handle-new-msg :data (format nil "GET /~c~c" #\return #\newline))))
-;     (as:delay (lambda () (as:write-socket-data sock (format nil "whoa~c" #\newline) :force T)) :time 3)))
-
 (defmacro with-event-loop-bindings ((event-base) &body body)
+  "Make cl-async think the event loop was running all along, because it
+otherwise sometimes refuses to work."
   `(let ((as::*event-base* ,event-base)
          (as::*data-registry* (as::event-base-data-registry ,event-base))
          (as::*function-registry* (as::event-base-function-registry ,event-base)))
      ,@body))
 
 (defun init ()
+  "Initialize a new event-loop and return it."
   (let ((loop-pointer (cffi:foreign-alloc :unsigned-char :count (uv:uv-loop-size))))
     (uv:uv-loop-init loop-pointer)
     (let ((event-loop (make-instance
                        'as::event-base
                        :c loop-pointer
-                       :id 0
+                       :id 0  ; TODO: should id change for each new loop?
                        :catch-app-errors NIL
                        :send-errors-to-eventcb T)))
       (with-event-loop-bindings (event-loop)
@@ -33,6 +26,7 @@
         event-loop))))
 
 (defun add-listener (event-base callback &key host port file)
+  "Add a new listener to event-loop."
   (flet ((clean-callback (socket data)
            (declare (ignore socket))
            (funcall callback data))
@@ -47,18 +41,22 @@
       (run-io-listener)))))
 
 (defun run-once (event-base)
+  "Run event loop once, blocking the execution of the thread until a new message is received."
   (with-event-loop-bindings (event-base)
     (uv:uv-run (as::event-base-c event-base) (cffi:foreign-enum-value 'uv:uv-run-mode :run-once))))
 
 (defun run-forever (event-base)
+  "Run event loop forever, blocking the execution and processing all received messages."
   (with-event-loop-bindings (event-base)
     (uv:uv-run (as::event-base-c event-base) (cffi:foreign-enum-value 'uv:uv-run-mode :run-default))))
 
 (defun send (event-base socket msg)
+  "Send msg using event-loop via the provided socket."
   (with-event-loop-bindings (event-base)
     (as:write-socket-data socket msg :force t)))
 
 (defun clean (event-base &optional with-error)
+  "Clean up and properly close the event-loop, and throw an error with-error if it is supplied."
   (with-event-loop-bindings (event-base)
     (as:exit-event-loop)
     (as::do-close-loop (as::event-base-c as::*event-base*))

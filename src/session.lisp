@@ -1,9 +1,10 @@
 (in-package #:messagepack-rpc)
 
 
-(defparameter *max-request-id* 0)
+(defparameter *max-request-id* 0 "Maximal request id used")
 
 (defun get-unique-request-id ()
+  "Return a unique, not yet used request id."
   (incf *max-request-id*))
 
 (defclass session ()
@@ -15,10 +16,13 @@
 (defmethod initialize-instance :after ((session session) &key host port file)
   (flet ((callback-handler (data)
            (let ((mpk:*decoder-prefers-lists* T))
+             ; We may have received multiple messages between our last check,
+             ; so we need to properly split them and evaluate each one
              (flexi-streams:with-input-from-sequence (stream data)
                (while (listen stream)
                  (on-message session (mpk:decode-stream stream)))))))
     (setf (socket session) (el:add-listener (event-loop session) #'callback-handler :host host :port port :file file))))
+
 
 (define-rpc-type request 0 id method params)
 (define-rpc-type response 1 id error result)
@@ -26,7 +30,7 @@
 
 
 (defmethod register-callback ((session session) method callback)
-  "Register a callback which will get called when server sends
+  "Register a callback which will get called when server/client sends
    request or notification for method."
   (setf (gethash method (callbacks session)) callback))
 
@@ -36,6 +40,9 @@
 
 
 (defmethod call-async ((session session) method &rest params)
+  "Use session to call server's method with specified params and immediately
+pass control back to the caller, returning a future object. If you want to
+later check the results, use JOIN on the future."
   (let* ((id (get-unique-request-id))
          (future (make-instance 'el:future :event-loop (event-loop session))))
     (setf (gethash id (active-requests session)) future)
@@ -43,29 +50,44 @@
     future))
 
 (defmethod call ((session session) method &rest params)
+  "Invoke call-async with the specified arguments, and call join on the
+returned future. This call thus blocks the thread until response from the
+server is received."
   (join (apply #'call-async session method params)))
 
 (defmethod request ((session session) method &rest params)
+  "Alias for CALL."
   (apply #'call session method params))
 
 (defmethod notify ((session session) method &rest params)
+  "Use session to call server's method with specified params, immediately
+returning control to the caller. This call completely ignores server
+responses."
   (send-notification session method (or params #()))
   T)
 
 
 (defmethod on-message ((session session) message)
+  "Properly handle a newly received message by dispatching it to the correct
+handler based on its type."
   (cond ((requestp message) (apply #'on-request session (parse-request message)))
         ((responsep message) (apply #'on-response session (parse-response message)))
         ((notificationp message) (apply #'on-notification session (parse-notification message)))))
 
 (defmethod on-request ((session session) &key id method params)
+  "Handle a new request from the server, calling the appropriate callback and
+responding with its return value if the call is successful, or catch the
+error and respond with it."
   (handler-case (send-response session id NIL (apply (gethash method (callbacks session)) params))
     (error (desc) (send-response session id (format NIL "~A" desc) NIL))))
 
 (defmethod on-response ((session session) &key id error result)
+  "Handle a response from the server by finishing the appropriate future from
+active-requests of the session with the received result or error."
   (let ((future (gethash id (active-requests session))))
     (remhash id (active-requests session))
     (finish future :error error :result result)))
 
 (defmethod on-notification ((session session) &key method params)
+  "Handle a new notification from the server by calling the appropriate callback."
   (apply (gethash method (callbacks session)) params))
