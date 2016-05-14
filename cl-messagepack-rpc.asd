@@ -1,8 +1,13 @@
 (asdf:defsystem #:cl-messagepack-rpc
-  :description "Implementation of client side for messagepack-rpc specification."
+  :description "A Common Lisp implementation of the MessagePack-RPC specification."
   :author "Andrej Dolenc <andrej.dolenc@student.uni-lj.si>"
   :license "MIT"
-  :depends-on (#:cl-messagepack #:cl-async #:cl-libuv #:flexi-streams #:alexandria)
+  :depends-on (#:cl-messagepack
+               #:cl-async
+               #:cl-libuv
+               #:cffi
+               #:flexi-streams
+               #:alexandria)
   :serial t
   :components ((:file "src/package")
                (:file "src/utils")
