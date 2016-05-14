@@ -69,7 +69,7 @@ Use SESSION to call METHOD with PARAMS and immediately return control to the cal
 ```
 
 #### call (session method &rest params)
-Invoke [CALL-ASYNC](#call-async-session-method-rest-params-future) on the passed arguments, and call [JOIN](#join-future) on the returned future.
+Invoke [CALL-ASYNC](#call-async-session-method-rest-params--future) on the passed arguments, and call [JOIN](#join-future) on the returned future.
 ```common-lisp
 (call *client* "server_side_add" 1 2 3)
 ;=> 6
