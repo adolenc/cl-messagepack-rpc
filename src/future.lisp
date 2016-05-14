@@ -16,5 +16,5 @@
   (while (not (finishedp future))
     (run-once (event-loop future)))
   (if (err future)
-    (error (err future))
+    (error (format NIL "~A" (err future)))
     (result future)))
