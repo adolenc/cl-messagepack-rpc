@@ -1,4 +1,8 @@
-## cl-messagepack-rpc
+cl-messagepack-rpc
+==================
+[![Quicklisp dist](http://quickdocs.org/badge/cl-messagepack-rpc.svg)](http://quickdocs.org/cl-messagepack-rpc/)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 A Common Lisp implementation of the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) protocol, using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. This library follows the [msgpack-rpc specifcation](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md).
 
 Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for clients are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
