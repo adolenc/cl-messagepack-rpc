@@ -49,6 +49,6 @@
            #:register-callback
            #:remove-callback
            #:call
-           #:async-call
+           #:call-async
            #:request
            #:notify))

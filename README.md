@@ -24,7 +24,7 @@ This library tries to follow the official specification as closely as possible. 
 (mrpc:call *client* "echo" "Hello server!")
 ;=> "Hello server!"
 
-(defparameter *future* (mrpc:async-call *client* "execute_some_long_task"))
+(defparameter *future* (mrpc:call-async *client* "execute_some_long_task"))
 ;=> *future*
 
 (mrpc:request *client* "add" 3 2) ; mrpc:request is an alias for mrpc:call
@@ -61,15 +61,15 @@ Remove a previously registered callback with name METHOD from SESSION.
 (remove-callback *client* "add")
 ```
 
-#### async-call (session method &rest params) => future
+#### call-async (session method &rest params) => future
 Use SESSION to call METHOD with PARAMS and immediately return control to the caller, returning a [future](#future) object.
 ```common-lisp
-(async-call *client* "server_side_add" 1 2 3)
+(call-async *client* "server_side_add" 1 2 3)
 ;=> #<EVENT-LOOP:FUTURE {100962B8F3}>
 ```
 
 #### call (session method &rest params)
-Invoke [ASYNC-CALL](#async-call-session-method-rest-params--future) on the passed arguments, and call [JOIN](#join-future) on the returned future.
+Invoke [CALL-ASYNC](#call-async-session-method-rest-params--future) on the passed arguments, and call [JOIN](#join-future) on the returned future.
 ```common-lisp
 (call *client* "server_side_add" 1 2 3)
 ;=> 6
@@ -91,12 +91,12 @@ Class used to hold responses from the server. You should not need to create futu
 #### join (future)
 Block execution until FUTURE has a result from the server. Then either return a result, or throw an error, depending on how the server responded.
 ```common-lisp
-(let ((future (async-call *client* "add" 3 2)))
+(let ((future (call-async *client* "add" 3 2)))
   ; do something...
   (join future))
 ;=> 5
 
-(let ((future (async-call *client* "add" 3 "some string")))
+(let ((future (call-async *client* "add" 3 "some string")))
   ; do something...
   (join future))
 ;=> ERROR: unexpected types of arguments.
