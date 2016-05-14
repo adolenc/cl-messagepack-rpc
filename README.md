@@ -1,7 +1,7 @@
-## About
-This is a Common Lisp implementation of the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) protocol, using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood to follow the [msgpack-rpc specifcation](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md).
+## cl-messagepack-rpc
+A Common Lisp implementation of the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) protocol, using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. This library follows the [msgpack-rpc specifcation](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md).
 
-Currently only the client side functionality is fully supported, but some server-side features like registering callbacks are also implemented.
+Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for clients are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
 
 ## Installing package
 The simplest way to install the package and the dependencies is to use [quicklisp](https://www.quicklisp.org/). For now you will need to manually clone this repository into your `~/quicklisp/local-projects` folder:
@@ -76,7 +76,7 @@ Invoke [CALL-ASYNC](#call-async-session-method-rest-params--future) on the passe
 ```
 
 #### request (session method &rest params)
-Alias for CALL.
+Alias for [CALL](#call-session-method-rest-params).
 
 #### notify (session method &rest params)
 Use SESSION to call METHOD with PARAMS, immediately returning control to the caller. This call completely ignores server responses.
