@@ -35,7 +35,7 @@
   (remhash method (callbacks session)))
 
 
-(defmethod call-async ((session session) method &rest params)
+(defmethod async-call ((session session) method &rest params)
   (let* ((id (get-unique-request-id))
          (future (make-instance 'el:future :event-loop (event-loop session))))
     (setf (gethash id (active-requests session)) future)
@@ -43,7 +43,7 @@
     future))
 
 (defmethod call ((session session) method &rest params)
-  (join (apply #'call-async session method params)))
+  (join (apply #'async-call session method params)))
 
 (defmethod request ((session session) method &rest params)
   (apply #'call session method params))
@@ -62,7 +62,7 @@
   (handler-case (send-response session id NIL (apply (gethash method (callbacks session)) params))
     (error (desc) (send-response session id (format NIL "~A" desc) NIL))))
 
-(defmethod on-response ((session session) &rest args &key id error result)
+(defmethod on-response ((session session) &key id error result)
   (let ((future (gethash id (active-requests session))))
     (remhash id (active-requests session))
     (finish future :error error :result result)))
