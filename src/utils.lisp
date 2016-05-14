@@ -11,3 +11,6 @@
   `(do ()
        ((not ,test))
      ,@body))
+
+(defun zip (&rest lists)
+  (apply #'alexandria:mappend #'list lists))

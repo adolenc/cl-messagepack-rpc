@@ -16,4 +16,4 @@
        (defun ,predicate-name (msg)
          (= (first msg) ,type-id))
        (defun ,parse-name (msg)
-         (alexandria:mappend #'list ',component-keywords (rest msg))))))
+         (zip ',component-keywords (rest msg))))))

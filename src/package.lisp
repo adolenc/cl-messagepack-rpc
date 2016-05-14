@@ -6,7 +6,8 @@
   ;; utils.lisp
   (:export #:while
            #:symbol-concat
-           #:mklst))
+           #:mklst
+           #:zip))
 
 (defpackage #:event-loop
   (:nicknames #:el)
