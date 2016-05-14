@@ -37,6 +37,7 @@
         #:messagepack
         #:flexi-streams
         #:event-loop
+        #:alexandria
         #:messagepack-rpc.utils)
   ;; cl-messagepack
   (:export #:*extended-types*)

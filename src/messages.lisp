@@ -4,6 +4,8 @@
 (defmacro define-rpc-type (type-name type-id &rest components)
   (let ((make-name (symbol-concat 'make- type-name))
         (send-name (symbol-concat 'send- type-name))
+        (parse-name (symbol-concat 'parse- type-name))
+        (component-keywords (mapcar #'(lambda (c) (intern (symbol-name c) :keyword)) components))
         (predicate-name (symbol-concat type-name 'p)))
     `(progn
        (defun ,make-name ,components
@@ -12,4 +14,6 @@
        (defmethod ,send-name ((session session) ,@components)
          (send (event-loop session) (socket session) (,make-name ,@components)))
        (defun ,predicate-name (msg)
-         (= (first msg) ,type-id)))))
+         (= (first msg) ,type-id))
+       (defun ,parse-name (msg)
+         (alexandria:mappend #'list ',component-keywords (rest msg))))))

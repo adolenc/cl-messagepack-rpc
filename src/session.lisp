@@ -14,14 +14,15 @@
 
 (defmethod initialize-instance :after ((session session) &key host port file)
   (flet ((callback-handler (data)
-           (flexi-streams:with-input-from-sequence (stream data)
-             (while (listen stream)
-               (on-message session (mpk:decode-stream stream))))))
+           (let ((mpk:*decoder-prefers-lists* T))
+             (flexi-streams:with-input-from-sequence (stream data)
+               (while (listen stream)
+                 (on-message session (mpk:decode-stream stream)))))))
     (setf (socket session) (el:add-listener (event-loop session) #'callback-handler :host host :port port :file file))))
 
-(define-rpc-type request 0 msg-id msg-method msg-params)
-(define-rpc-type response 1 msg-id msg-error msg-result)
-(define-rpc-type notification 2 msg-method msg-params)
+(define-rpc-type request 0 id method params)
+(define-rpc-type response 1 id error result)
+(define-rpc-type notification 2 method params)
 
 
 (defmethod register-callback ((session session) method callback)
@@ -33,12 +34,12 @@
   "Remove a registered callback."
   (remhash method (callbacks session)))
 
+
 (defmethod call-async ((session session) method &rest params)
-  (let* ((request-id (get-unique-request-id))
-        (future (make-instance 'el:future :event-loop (event-loop session) :id request-id)))
-    (format t "Sending request ~A for ~A~%" request-id method)
-    (setf (gethash request-id (active-requests session)) future)
-    (send-request session request-id method (or params #()))
+  (let* ((id (get-unique-request-id))
+         (future (make-instance 'el:future :event-loop (event-loop session))))
+    (setf (gethash id (active-requests session)) future)
+    (send-request session id method (or params #()))
     future))
 
 (defmethod call ((session session) method &rest params)
@@ -51,9 +52,20 @@
   (send-notification session method (or params #()))
   T)
 
+
 (defmethod on-message ((session session) message)
-  (format t "RECEIVED ~A, id=~A~%" message (elt message 1))
-  (let* ((request-id (elt message 1))
-         (future (gethash request-id (active-requests session))))
-    (remhash request-id (active-requests session))
-    (finish future :result T)))
+  (cond ((requestp message) (apply #'on-request session (parse-request message)))
+        ((responsep message) (apply #'on-response session (parse-response message)))
+        ((notificationp message) (apply #'on-notification session (parse-notification message)))))
+
+(defmethod on-request ((session session) &key id method params)
+  (handler-case (send-response session id NIL (apply (gethash method (callbacks session)) params))
+    (error (desc) (send-response session id (format NIL "~A" desc) NIL))))
+
+(defmethod on-response ((session session) &rest args &key id error result)
+  (let ((future (gethash id (active-requests session))))
+    (remhash id (active-requests session))
+    (finish future :error error :result result)))
+
+(defmethod on-notification ((session session) &key method params)
+  (apply (gethash method (callbacks session)) params))

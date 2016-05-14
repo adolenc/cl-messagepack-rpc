@@ -2,7 +2,7 @@
   :description "Implementation of client side for messagepack-rpc specification."
   :author "Andrej Dolenc <andrej.dolenc@student.uni-lj.si>"
   :license "MIT"
-  :depends-on (#:cl-messagepack #:cl-async #:cl-libuv #:flexi-streams)
+  :depends-on (#:cl-messagepack #:cl-async #:cl-libuv #:flexi-streams #:alexandria)
   :serial t
   :components ((:file "src/package")
                (:file "src/utils")

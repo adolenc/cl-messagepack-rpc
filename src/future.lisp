@@ -7,10 +7,10 @@
    (err :initarg :error :accessor err :initform NIL)
    (event-loop :initarg :event-loop :accessor event-loop :initform (error "Must specify event-loop to use."))))
 
-(defmethod finish ((future future) &key result err)
+(defmethod finish ((future future) &key result error)
   (setf (finishedp future) T
         (result future) result
-        (err future) err))
+        (err future) error))
 
 (defmethod join ((future future))
   (while (not (finishedp future))
