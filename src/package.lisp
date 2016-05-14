@@ -41,6 +41,8 @@
         #:messagepack-rpc.utils)
   ;; cl-messagepack
   (:export #:*extended-types*)
+  ;; event-loop
+  (:export #:join)
   ;; session.lisp
   (:export #:session
            #:register-callback
