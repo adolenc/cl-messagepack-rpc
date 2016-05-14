@@ -15,4 +15,6 @@
 (defmethod join ((future future))
   (while (not (finishedp future))
     (run-once (event-loop future)))
-  (result future))
+  (if (err future)
+    (error (err future))
+    (result future)))
