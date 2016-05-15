@@ -7,7 +7,5 @@
   :serial t
   :components ((:file "t/package")
                (:file "t/setup")
-               (:file "t/general"))
-  :perform (test-op (op c)
-             (funcall (intern (symbol-name :run!) (find-package :fiveam))
-                      (intern (symbol-name :messagepack-rpc-test-suite) (find-package :messagepack-rpc-tests)))))
+               (:file "t/general")
+               (:file "t/final")))
