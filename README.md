@@ -3,9 +3,7 @@ cl-messagepack-rpc
 [![Quicklisp dist](http://quickdocs.org/badge/cl-messagepack-rpc.svg)](http://quickdocs.org/cl-messagepack-rpc/)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-This is a Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specifcation](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood.
-
-Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for sessions are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
+This is a Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specification](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for sessions are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
 
 ## Installing package
 The simplest way to install the package and the dependencies is to use [quicklisp](https://www.quicklisp.org/). For now you will need to manually clone this repository into your `~/quicklisp/local-projects` folder:
@@ -41,7 +39,7 @@ This library tries to follow the official specification as closely as possible. 
 ;=> T
 ```
 
-## Exported API
+## Exported symbols
 
 #### \*extended-types\*
 Export of [\*extended-types\* parameter from cl-mesasgepack](https://github.com/mbrezu/cl-messagepack#extended-types).
@@ -105,6 +103,17 @@ Block execution until FUTURE has a result from the server. Then either return a 
   (join future))
 ;=> ERROR: unexpected types of arguments.
 ```
+
+## Running unit tests
+Because server-side support is not yet implemented, tests use a python based server. So in order to test the library, first start the python server:
+
+    $ python t/server.py
+
+and then evaluate
+
+    * (asdf:test-system :cl-messagepack-rpc)
+
+from the REPL to run the actual tests.
 
 ## Support
 The library is developed and tested with `sbcl` under Debian GNU/Linux, but should work everywhere [cl-async](https://github.com/orthecreedence/cl-async) does.
