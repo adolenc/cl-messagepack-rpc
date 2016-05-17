@@ -31,6 +31,5 @@
                        (fail))
     (error (e) (is (string= "'unknown' method not found" (format NIL "~A" e))))))
 
-(test async-result
-  (with-fixture mrpc-client (*connections*)
-    (is (string= "You are async!" (mrpc:call *client* "async_result")))))
+(test-client async-result
+  (is (string= "You are async!" (mrpc:call *client* "async_result"))))

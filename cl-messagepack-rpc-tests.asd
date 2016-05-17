@@ -7,5 +7,5 @@
   :serial t
   :components ((:file "t/package")
                (:file "t/setup")
-               (:file "t/general")
+               (:file "t/client")
                (:file "t/final")))
