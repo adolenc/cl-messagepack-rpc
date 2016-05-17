@@ -1,7 +1,6 @@
 # Taken and adapted from https://github.com/msgpack-rpc/msgpack-rpc-python/blob/master/test/test_msgpackrpc.py
 from time import sleep
-import threading
-
+import signal, sys, threading
 import msgpackrpc
 from msgpackrpc import error
 
@@ -41,7 +40,21 @@ class TestServer(object):
         threading.Thread(target=do_async).start()
         return ar
 
+def kill_server(server):
+    def handler(signal, frame):
+        print "Stopping server..."
+        server.stop()
+        print "Server stopped."
+        sys.exit(0)
+    return handler
+
 if __name__ == "__main__":
-    server = msgpackrpc.Server(TestServer())
-    server.listen(msgpackrpc.Address("localhost", 18800))
-    server.start()
+    try:
+        server = msgpackrpc.Server(TestServer())
+        server.listen(msgpackrpc.Address("localhost", 18800))
+        signal.signal(signal.SIGINT, kill_server(server))
+        print "Starting server on localhost:18800."
+        server.start()
+    except Exception as err:
+        print "Could not start server on localhost:18800."
+        sys.exit(1)
