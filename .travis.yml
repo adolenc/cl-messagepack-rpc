@@ -7,7 +7,7 @@ cache:
 
 env:
   matrix:
-    - LISP=sbcl
+    - LISP=sbcl COVERALLS=true
     - LISP=ccl
 
 before_install:
@@ -17,28 +17,31 @@ before_install:
   # Ofc libuv1-dev is not available via apt for ancient Ubuntu distro that Travis is using so we build it from source and cache it
   - sudo apt-get install -y libtool autotools-dev automake gcc-multilib g++-multilib
   - if [ ! -e $HOME/libuv-v1.9.0/Makefile ]; then cd $HOME && wget archive.ubuntu.com/ubuntu/pool/universe/libu/libuv1/libuv1_1.9.0.orig.tar.gz && tar -xzf libuv1_1.9.0.orig.tar.gz && cd libuv-v1.9.0 && sh autogen.sh && ./configure && make && make check; fi
-  - cd $HOME/libuv-v1.9.0 && sudo make install && cd $HOME/build/adolenc/travis-test
+  - cd $HOME/libuv-v1.9.0 && sudo make install && cd $HOME/build/adolenc/cl-messagepack-rpc
   # Install msgpackrpc package for python server
   - pip install --user msgpack-rpc-python
 
 install:
   # Install cl-travis
   - curl https://raw.githubusercontent.com/luismbo/cl-travis/master/install.sh | bash
+  # Coveralls support
+  - git clone https://github.com/fukamachi/cl-coveralls ~/lisp/cl-coveralls
 
 before_script:
   # Start the msgpack-rpc server
   - python t/server.py & export SERVER_PID=$!
 
 script:
-  - cl -l fiveam
+  - cl -l fiveam -l cl-coveralls
        -e '(setf fiveam:*debug-on-error* t
                  fiveam:*debug-on-failure* t)'
        -e '(setf *debugger-hook*
                  (lambda (c h)
                    (declare (ignore c h))
                    (uiop:quit -1)))'
-       -e '(ql:quickload :cl-messagepack-rpc-tests)'
-       -e '(asdf:test-system :cl-messagepack-rpc)'
+       -e '(coveralls:with-coveralls (:exclude (list "t"))
+             (ql:quickload :cl-messagepack-rpc-tests)
+             (asdf:test-system :cl-messagepack-rpc)'
 
 after_script:
   - kill -SIGINT $SERVER_PID
