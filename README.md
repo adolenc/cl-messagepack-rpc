@@ -1,9 +1,11 @@
 cl-messagepack-rpc
 ==================
+[![Build Status](https://travis-ci.org/adolenc/cl-messagepack-rpc.svg?branch=master)](https://travis-ci.org/adolenc/cl-messagepack-rpc)
+[![Coverage Status](https://coveralls.io/repos/github/adolenc/cl-messagepack-rpc/badge.svg?branch=master)](https://coveralls.io/github/adolenc/cl-messagepack-rpc?branch=master)
 [![Quicklisp dist](http://quickdocs.org/badge/cl-messagepack-rpc.svg)](http://quickdocs.org/cl-messagepack-rpc/)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-This is a Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specification](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for sessions are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
+A Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specification](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for sessions are also implemented. Library supports connecting to the server via TCP sockets or using named pipes.
 
 ## Installing package
 The simplest way to install the package and the dependencies is to use [quicklisp](https://www.quicklisp.org/). For now you will need to manually clone this repository into your `~/quicklisp/local-projects` folder:
