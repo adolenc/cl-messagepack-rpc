@@ -1,4 +1,4 @@
-(in-package #:event-loop)
+(in-package #:messagepack-rpc.event-loop)
 
 
 (defclass future ()

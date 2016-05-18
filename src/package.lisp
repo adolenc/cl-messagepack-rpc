@@ -9,7 +9,7 @@
            #:mklst
            #:zip))
 
-(defpackage #:event-loop
+(defpackage #:messagepack-rpc.event-loop
   (:nicknames #:el)
   (:use #:cl
         #:bordeaux-threads 
@@ -37,7 +37,7 @@
   (:use #:cl
         #:messagepack
         #:flexi-streams
-        #:event-loop
+        #:messagepack-rpc.event-loop
         #:alexandria
         #:messagepack-rpc.utils)
   ;; cl-messagepack

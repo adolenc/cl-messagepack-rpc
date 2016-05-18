@@ -1,4 +1,4 @@
-(in-package #:event-loop)
+(in-package #:messagepack-rpc.event-loop)
 
 
 (defmacro with-event-loop-bindings ((event-base) &body body)
