@@ -14,5 +14,6 @@
                (:file "src/future")
                (:file "src/event-loop")
                (:file "src/messages")
-               (:file "src/session"))
+               (:file "src/session")
+               (:file "src/client"))
   :in-order-to ((test-op (test-op cl-messagepack-rpc-tests))))

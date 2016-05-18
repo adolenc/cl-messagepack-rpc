@@ -12,7 +12,7 @@
 
 (def-fixture mrpc-client (connections)
   (dolist (connection connections)
-    (let ((*client* (apply #'make-instance 'mrpc:session connection)))
+    (let ((*client* (apply #'make-instance 'mrpc:client connection)))
       (&body))))
 
 (defmacro test-client (name &body body)

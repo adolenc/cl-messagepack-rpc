@@ -13,21 +13,18 @@
    (callbacks :initform (make-hash-table :test 'equal) :accessor callbacks)
    (active-requests :initform (make-hash-table) :accessor active-requests)))
 
-(defmethod initialize-instance :after ((session session) &key host port file)
-  (flet ((callback-handler (data)
-           (let ((mpk:*decoder-prefers-lists* T))
-             ; We may have received multiple messages between our last check,
-             ; so we need to properly split them and evaluate each one
-             (flexi-streams:with-input-from-sequence (stream data)
-               (while (listen stream)
-                 (on-message session (mpk:decode-stream stream)))))))
-    (setf (socket session) (el:add-listener (event-loop session) #'callback-handler :host host :port port :file file))))
-
-
 (define-rpc-type request 0 id method params)
 (define-rpc-type response 1 id error result)
 (define-rpc-type notification 2 method params)
 
+
+(defmethod callback-handler ((session session) data)
+  (let ((mpk:*decoder-prefers-lists* T))
+    ; DATA may contain multiple messages so we need to properly split it up and
+    ; evaluate each one separately.
+    (flexi-streams:with-input-from-sequence (stream data)
+      (while (listen stream)
+        (on-message session (mpk:decode-stream stream))))))
 
 (defmethod register-callback ((session session) method callback)
   "Register a callback which will get called when server/client sends

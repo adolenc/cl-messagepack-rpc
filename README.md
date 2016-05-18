@@ -24,7 +24,7 @@ In order to get cl-async working, you will also need `libuv1-dev` binaries, whic
 This library tries to follow the official specification as closely as possible. For a quick taste:
 
 ```common-lisp
-(defparameter *client* (make-instance 'mrpc:session :file "/path/to/named/pipe"))
+(defparameter *client* (make-instance 'mrpc:client :file "/path/to/named/pipe"))
 (mrpc:call *client* "echo" "Hello server!")
 ;=> "Hello server!"
 
@@ -47,10 +47,13 @@ This library tries to follow the official specification as closely as possible. 
 Export of [\*extended-types\* parameter from cl-mesasgepack](https://github.com/mbrezu/cl-messagepack#extended-types).
 
 #### session
-Main class used to connect to a running server. Library supports connecting via TCP or named pipes, and you can specify which protocol you want to use via `make-instance` call:
+Class serving as a superclass to client. 
+
+#### client (session)
+Main class used to connect to an already running server. Library supports connecting via TCP or named pipes, and you can specify which protocol you want to use via `make-instance` call:
 ```common-lisp
-(make-instance 'session :host "127.0.0.1" :port 1985) ; to connect via TCP
-(make-instance 'session :file "/path/to/named/pipe") ; to connect via named pipe
+(defparameter *client*  (make-instance 'client :host "127.0.0.1" :port 1985)) ; to connect via TCP
+(defparameter *client2* (make-instance 'client :file "/path/to/named/pipe")) ; to connect via named pipe
 ```
 
 #### register-callback (session method callback)

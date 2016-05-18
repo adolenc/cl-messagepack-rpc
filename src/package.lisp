@@ -45,10 +45,11 @@
   ;; event-loop
   (:export #:join)
   ;; session.lisp
-  (:export #:session
-           #:register-callback
+  (:export #:register-callback
            #:remove-callback
            #:call
            #:call-async
            #:request
-           #:notify))
+           #:notify)
+  ;; client.lisp
+  (:export #:client))
