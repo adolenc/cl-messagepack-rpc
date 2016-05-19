@@ -1,13 +1,20 @@
 (in-package :cl-user)
 
-
 (defpackage #:messagepack-rpc.utils
   (:use #:cl)
   ;; utils.lisp
   (:export #:while
            #:symbol-concat
-           #:mklst
            #:zip))
+
+(defpackage #:messagepack-rpc.conditions
+  (:use #:cl)
+  ;; conditions.lisp
+  (:export #:rpc-error
+           #:transport-error
+           #:call-error
+           #:no-method-error
+           #:argument-error))
 
 (defpackage #:messagepack-rpc.event-loop
   (:nicknames #:el)
@@ -15,7 +22,8 @@
         #:bordeaux-threads 
         #:cffi
         #:cl-async
-        #:messagepack-rpc.utils)
+        #:messagepack-rpc.utils
+        #:messagepack-rpc.conditions)
   (:import-from #:libuv #:uv-run-mode #:uv-run)
   ;; event-loop.lisp
   (:export #:init
@@ -37,11 +45,18 @@
   (:use #:cl
         #:messagepack
         #:flexi-streams
-        #:messagepack-rpc.event-loop
         #:alexandria
-        #:messagepack-rpc.utils)
+        #:messagepack-rpc.utils
+        #:messagepack-rpc.conditions
+        #:messagepack-rpc.event-loop)
   ;; cl-messagepack
   (:export #:*extended-types*)
+  ;; conditions
+  (:export #:rpc-error
+           #:transport-error
+           #:call-error
+           #:no-method-error
+           #:argument-error)
   ;; event-loop
   (:export #:join)
   ;; session.lisp

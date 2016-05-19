@@ -88,7 +88,7 @@ Alias for [CALL](#call-session-method-rest-params).
 #### notify (session method &rest params)
 Use SESSION to call METHOD with PARAMS, immediately returning control to the caller. This call completely ignores server responses.
 ```common-lisp
-(call *client* "do_something")
+(notify *client* "do_something")
 ;=> T
 ```
 

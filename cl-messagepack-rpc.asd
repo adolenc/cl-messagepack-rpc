@@ -11,6 +11,7 @@
   :serial t
   :components ((:file "src/package")
                (:file "src/utils")
+               (:file "src/conditions")
                (:file "src/future")
                (:file "src/event-loop")
                (:file "src/messages")

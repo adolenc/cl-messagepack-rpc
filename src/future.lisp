@@ -20,5 +20,5 @@ server responded."
   (while (not (finishedp future))
     (run-once (event-loop future)))
   (if (err future)
-    (error (format NIL "~A" (err future)))
+    (error 'rpc-error :message (format NIL "~A" (err future)))
     (result future)))

@@ -23,13 +23,13 @@
   (is (equal '(1 "test" NIL T) (mrpc:call *client* "push_to_register" T))))
 
 (test-client raise-error
-  (signals simple-error (mrpc:call *client* "raise_error")))
+  (signals mrpc:rpc-error (mrpc:call *client* "raise_error")))
 
 (test-client unknown-method
-  (signals simple-error (mrpc:call *client* "unknown" T))
+  (signals mrpc:rpc-error (mrpc:call *client* "unknown" T))
   (handler-case (progn (mrpc:call *client* "unknown" T)
                        (fail))
-    (error (e) (is (string= "'unknown' method not found" (format NIL "~A" e))))))
+    (mrpc:rpc-error (e) (is (string= "'unknown' method not found" (format NIL "~A" e))))))
 
 (test-client async-result
   (is (string= "You are async!" (mrpc:call *client* "async_result"))))

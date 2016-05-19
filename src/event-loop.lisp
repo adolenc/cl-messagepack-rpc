@@ -63,7 +63,7 @@ otherwise sometimes refuses to work."
     ; (static-vectors:free-static-vector as::*output-buffer*)
     ; (static-vectors:free-static-vector as::*input-buffer*)
     (as::free-pointer-data (as::event-base-c as::*event-base*) :preserve-pointer t)
-    (if with-error (error with-error))))
+    (if with-error (error 'transport-error :message with-error))))
 
 (setf as::*output-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
 (setf as::*input-buffer* (static-vectors:make-static-vector as::*buffer-size* :element-type 'octet))
