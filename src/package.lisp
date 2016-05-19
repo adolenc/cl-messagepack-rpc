@@ -25,13 +25,14 @@
         #:messagepack-rpc.utils
         #:messagepack-rpc.conditions)
   (:import-from #:libuv #:uv-run-mode #:uv-run)
+  ;; connection.lisp
+  (:export #:connect-pipe
+           #:connect-tcp
+           #:send)
   ;; event-loop.lisp
   (:export #:init
-           #:add-listener
            #:run-once
            #:run-forever
-           #:send
-           #:handle-msg
            #:clean)
   ;; future.lisp
   (:export #:future

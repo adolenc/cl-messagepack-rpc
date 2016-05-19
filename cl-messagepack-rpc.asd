@@ -13,6 +13,7 @@
                (:file "src/utils")
                (:file "src/conditions")
                (:file "src/future")
+               (:file "src/connection")
                (:file "src/event-loop")
                (:file "src/messages")
                (:file "src/session")
