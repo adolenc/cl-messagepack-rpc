@@ -26,7 +26,8 @@
         #:messagepack-rpc.conditions)
   (:import-from #:libuv #:uv-run-mode #:uv-run)
   ;; connection.lisp
-  (:export #:connect-pipe
+  (:export #:connect-stream
+           #:connect-pipe
            #:connect-tcp
            #:send)
   ;; event-loop.lisp

@@ -14,16 +14,50 @@ otherwise sometimes refuses to work."
   (clean as::*event-base* "Connection closed!"))
 
 
-(defun connect-pipe (event-base callback &key path)
+(defparameter *read-interval* 0.001 "Elapsed time in seconds between two consecutive reads for connect-stream")
+
+(defun connect-stream (event-base callback &key (input-stream *standard-input*) (output-stream *standard-output*))
+  "Establish a connection on top of event-base via input and output streams,
+calling CALLBACK with new data when it is available."
+  (labels ((collect-input ()
+             "Block thread until data is available on input-stream and retrieve it."
+             (loop until (listen input-stream)
+                   do (sleep *read-interval*)
+                   finally (return (loop while (listen input-stream)
+                                         collect (read-byte input-stream))))))
+    (with-event-loop-bindings (event-base)
+      (let* ((result nil)
+             (new-msg-ready (as:make-notifier (lambda ()
+                                                (funcall callback result))
+                                              :single-shot NIL)))
+        (bt:make-thread (lambda ()
+                          (loop do (progn
+                                     (setf result (collect-input))
+                                     (as:trigger-notifier new-msg-ready))))))))
+  output-stream)
+
+(defun connect-pipe (event-base callback &key file)
+  "Establish a connection on top of event-base via named pipe, calling CALLBACK
+with new data when it is available."
   (with-event-loop-bindings (event-base)
     (as:pipe-connect file #'(lambda (s d) (funcall callback d)) :event-cb #'on-connection-close)))
 
 (defun connect-tcp (event-base callback &key host port)
+  "Establish a connection on top of event-base via TCP, calling CALLBACK with
+new data when it is available."
   (with-event-loop-bindings (event-base)
     (as:tcp-connect host port #'(lambda (s d) (funcall callback d)) :event-cb #'on-connection-close)))
 
 
-(defun send (event-base socket msg)
-  "Send msg using event-loop via the provided socket."
+(defgeneric send (event-base socket msg)
+  (:documentation "Send MSG via SOCKET using EVENT-BASE event-loop"))
+
+(defmethod send ((event-base as::event-base) (socket as::socket) msg)
+  ; Sending via cl-async's socket - i.e. pipe or tcp
   (with-event-loop-bindings (event-base)
     (as:write-socket-data socket msg :force t)))
+
+(defmethod send ((event-base as::event-base) (socket T) msg)
+  ; Sending via custom streams
+  (with-event-loop-bindings (event-base)
+    (loop for b across msg do (write-byte b socket) finally (force-output socket))))
