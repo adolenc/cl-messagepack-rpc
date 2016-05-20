@@ -14,8 +14,4 @@
 
 (define-condition no-method-error (call-error)
   ()
-  (:report (lambda (c s) (format s "'~A' method not found." (message c)))))
-
-(define-condition argument-error (call-error)
-  ()
-  (:report (lambda (c s) (format s "'~A' method not found." (message c)))))
+  (:report (lambda (c s) (format s "'~A' method not found" (message c)))))
