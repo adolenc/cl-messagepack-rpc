@@ -11,4 +11,7 @@
     (setf (socket client) (apply connection-type
                                  (event-loop client)
                                  #'(lambda (data) (callback-handler client data))
-                                 args))))
+                                 args))
+    ; Try establishing a connection for the first time when using cl-async's sockets
+    (when (subtypep (type-of (socket client)) 'as::socket)
+      (el:run-once (event-loop client)))))
