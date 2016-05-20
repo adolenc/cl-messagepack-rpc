@@ -30,7 +30,7 @@
   (let ((sum #'(lambda (a b &rest ns) (apply #'+ a b ns)))) ; slightly silly sum to simulate argument errors
     (is (equal '(:id 0 :error "'add' method not found" :result NIL)
                (simulate-request (0 "add" 1 2 3))))
-    (is (equal '(:id 1 :error "'add' method: invalid number of arguments: 1" :result NIL)
+    (is (equal '(:id 1 :error "'add' method: invalid number of arguments" :result NIL)
                (simulate-request (1 "add" 1)
                  (mrpc:register-callback *client* "add" sum))))
     (is (equal '(:id 2 :error "'add' method not found" :result NIL)

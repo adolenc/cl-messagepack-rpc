@@ -85,6 +85,7 @@ responding with its return value if the call is successful, or catch the
 error and respond with it."
   (handler-case (send-response session id NIL (apply-callback session method params))
     (no-method-error (desc) (send-response session id (format NIL "~A" desc) NIL))   
+    (program-error () (send-response session id (format NIL "'~A' method: invalid number of arguments" method) NIL))   
     (T (desc) (send-response session id (format NIL "'~A' method: ~A" method desc) NIL)))) 
 
 (defmethod on-response ((session session) &key id error result)
