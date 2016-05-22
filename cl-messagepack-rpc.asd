@@ -1,5 +1,5 @@
 (asdf:defsystem #:cl-messagepack-rpc
-  :description "A Common Lisp implementation of the MessagePack-RPC specification."
+  :description "A Common Lisp implementation of the MessagePack-RPC specification, which uses MessagePack serialization format to achieve efficient remote procedure calls (RPCs)."
   :author "Andrej Dolenc <andrej.dolenc@student.uni-lj.si>"
   :license "MIT"
   :depends-on (#:cl-messagepack

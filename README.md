@@ -5,7 +5,9 @@ cl-messagepack-rpc
 [![Quicklisp dist](http://quickdocs.org/badge/cl-messagepack-rpc.svg)](http://quickdocs.org/cl-messagepack-rpc/)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-A Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specification](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), using [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features like registering callbacks for sessions are also implemented. Library supports connecting to the server via TCP sockets, using named pipes or via user-specified streams.
+A Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgpack-rpc/msgpack-rpc) [specification](https://github.com/msgpack-rpc/msgpack-rpc/blob/master/spec.md), which uses [MessagePack](http://msgpack.org/) serialization format to achieve efficient [remote procedure calls (RPCs)](https://en.wikipedia.org/wiki/Remote_procedure_call).
+
+Library uses [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features (such as registering callbacks for sessions) are also implemented. Library supports connecting to the server via TCP sockets, named pipes or via user-specified streams (e.g. standard input and output streams).
 
 ## Installing package
 The simplest way to install the package and the dependencies is to use [quicklisp](https://www.quicklisp.org/). For now you will need to manually clone this repository into your `~/quicklisp/local-projects` folder:
@@ -50,12 +52,12 @@ Export of [\*extended-types\* parameter from cl-mesasgepack](https://github.com/
 Class serving as a superclass to client. 
 
 #### client (session)
-Main class used to connect to an already running server. Library supports connecting via TCP or named pipes, and you can specify which protocol you want to use via `make-instance` call:
+Main class used to connect to an already running server. You can specify which means of transport the server uses via `make-instance` call:
 ```common-lisp
 (defparameter *client*  (make-instance 'client :host "127.0.0.1" :port 1985)) ; to connect via TCP
 (defparameter *client2* (make-instance 'client :file "/path/to/named/pipe")) ; to connect via named pipe
 (defparameter *client3* (make-instance 'client)) ; to connect via standard input/output
-(defparameter *client4* (make-instance 'client :input-stream *standard-input* :output-stream *output-stream*)) ; same as above, but can be used for any input and output streams
+(defparameter *client4* (make-instance 'client :input-stream *standard-input* :output-stream *output-stream*)) ; same as above, but can be used for any (binary) input and output streams
 ```
 
 #### register-callback (session method callback)
@@ -120,7 +122,7 @@ and then evaluate
 
     * (asdf:test-system :cl-messagepack-rpc)
 
-from the REPL to run the actual tests.
+in the REPL to run the actual tests.
 
 ## Support
 The library is developed and tested with `sbcl` under Debian GNU/Linux, but should work everywhere [cl-async](https://github.com/orthecreedence/cl-async) does.
