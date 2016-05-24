@@ -36,3 +36,22 @@
 
 (test bad-connection
   (signals mrpc:transport-error (make-instance 'mrpc:client :host "127.0.0.1" :port 0)))
+
+(defun random-element (list)
+  "Return random element from the list."
+  (nth (random (length list)) list))
+
+(test-client stress-test
+  (let ((futures (list)))
+    (dotimes (i 2000)
+      (when (zerop (mod i 100)) (format t "~& Running test ~5<~A~>/2000 " i) (force-output))
+      (case (random 6)
+        (0 (is (= i (mrpc:call *client* "sum" 0 i))))
+        (1 (is (= i (mrpc:request *client* "sum" 0 i))))
+        (2 (mrpc:notify *client* "sum" 0 i) (pass))
+        (3 (push (list (mrpc:call-async *client* "sum" 0 i) i) futures) (pass))
+        (4 (if futures
+             (destructuring-bind (future expected-result) (random-element futures)
+               (is (= expected-result (mrpc:join future))))
+             (pass)))
+        (5 (signals mrpc:rpc-error (mrpc:call *client* "raise_error")))))))
