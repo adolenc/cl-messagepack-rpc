@@ -9,23 +9,21 @@ A Common Lisp library implementing the [MessagePack-RPC](https://github.com/msgp
 
 Library uses [cl-messagepack](https://github.com/mbrezu/cl-messagepack) and [cl-async](https://github.com/orthecreedence/cl-async) under the hood. Currently only the client side functionality is fully supported, but some server-side features (such as registering callbacks for sessions) are also implemented. Library supports connecting to the server via TCP sockets, named pipes or via user-specified streams (e.g. standard input and output streams).
 
-## Installing package
-The simplest way to install the package and the dependencies is to use [quicklisp](https://www.quicklisp.org/). For now you will need to manually clone this repository into your `~/quicklisp/local-projects` folder:
-
-    $ git clone https://github.com/adolenc/cl-messagepack-rpc ~/quicklisp/local-projects/cl-messagepack-rpc
-
-After that, evaluating
+## Installing
+Package is available through [Quicklisp](https://www.quicklisp.org/), so simply evaluating
 
     * (ql:quickload :cl-messagepack-rpc)
 
 from your REPL should properly load all the dependencies and cl-messagepack-rpc itself.
 
-In order to get cl-async working, you will also need `libuv1-dev` binaries, which you can install using your package manager.
+In order to get cl-async working, you will however also need `libuv1-dev` package, which you can install using your distribution's package manager.
 
 ## Usage
 This library tries to follow the official specification as closely as possible. For a quick taste:
 
 ```common-lisp
+(ql:quickload :cl-messagepack-rpc)
+
 (defparameter *client* (make-instance 'mrpc:client :file "/path/to/named/pipe"))
 (mrpc:call *client* "echo" "Hello server!")
 ;=> "Hello server!"
@@ -76,7 +74,7 @@ Remove a previously registered callback with name METHOD from SESSION.
 Use SESSION to call METHOD with PARAMS and immediately return control to the caller, returning a [future](#future) object.
 ```common-lisp
 (call-async *client* "server_side_add" 1 2 3)
-;=> #<EVENT-LOOP:FUTURE {100962B8F3}>
+;=> #<FUTURE {100962B8F3}>
 ```
 
 #### call (session method &rest params)
