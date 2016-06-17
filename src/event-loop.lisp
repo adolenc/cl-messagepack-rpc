@@ -12,9 +12,12 @@
                        :catch-app-errors NIL
                        :send-errors-to-eventcb T)))
       (with-event-loop-bindings (event-loop)
-        (as:signal-handler 2 #'(lambda (sig)
-                                 (declare (ignore sig))
-                                 (clean event-loop "Event loop exited.")))
+        (as:signal-handler as:+sigterm+ #'(lambda (sig)
+                                            (declare (ignore sig))
+                                            (clean event-loop "Received sigterm. Event loop exited.")))
+        (as:signal-handler as:+sigint+ #'(lambda (sig)
+                                           (declare (ignore sig))
+                                           (clean event-loop "Received sigint. Event loop exited.")))
         event-loop))))
 
 (defun run-once (event-base)
