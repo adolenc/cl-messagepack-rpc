@@ -39,11 +39,11 @@
                  (mrpc:remove-callback *client* "add"))))))
 
 (test on-error-in-callback
-  (let ((error-sum #'(lambda () (error "I am throwing an error!")))
-        (warning-sum #'(lambda () (warn "I am throwing a warning!"))))
+  (let ((throw-error #'(lambda () (error "I am throwing an error!")))
+        (throw-warning #'(lambda () (warn "I am throwing a warning!") "DONE")))
     (is (equal '(:id 0 :error "'add' method: I am throwing an error!" :result NIL)
                (simulate-request (0 "add")
-                 (mrpc:register-callback *client* "add" error-sum))))  
-    (is (equal '(:id 1 :error "'add' method: I am throwing a warning!" :result NIL)
+                 (mrpc:register-callback *client* "add" throw-error))))  
+    (is (equal '(:id 1 :error NIL :result "DONE")
                (simulate-request (1 "add")
-                 (mrpc:register-callback *client* "add" warning-sum))))))
+                 (mrpc:register-callback *client* "add" throw-warning))))))
