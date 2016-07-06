@@ -3,7 +3,7 @@ sudo: required
 
 cache:
   directories:
-    - $HOME/libuv-v1.9.0
+    - $HOME/libuv-v1.9.1
 
 env:
   matrix:
@@ -17,17 +17,17 @@ before_install:
   # Ofc libuv1-dev is not available via apt for ancient Ubuntu distro that Travis is using so we build it from source and cache it
   - sudo apt-get install -y libtool autotools-dev automake gcc-multilib g++-multilib
   - |
-    if [ ! -e $HOME/libuv-v1.9.0/Makefile ]; then
+    if [ ! -e $HOME/libuv-v1.9.1/Makefile ]; then
       cd $HOME && \
-      wget archive.ubuntu.com/ubuntu/pool/universe/libu/libuv1/libuv1_1.9.0.orig.tar.gz && \
-      tar -xzf libuv1_1.9.0.orig.tar.gz && \
-      cd libuv-v1.9.0 && \
+      wget archive.ubuntu.com/ubuntu/pool/universe/libu/libuv1/libuv1_1.9.1.orig.tar.gz && \
+      tar -xzf libuv1_1.9.1.orig.tar.gz && \
+      cd libuv-v1.9.1 && \
       sh autogen.sh && \
       ./configure && \
       make && \
       make check
     fi
-  - cd $HOME/libuv-v1.9.0 && sudo make install && cd $HOME/build/adolenc/cl-messagepack-rpc
+  - cd $HOME/libuv-v1.9.1 && sudo make install && cd $HOME/build/adolenc/cl-messagepack-rpc
   # Install msgpackrpc package for python server
   - pip install --user msgpack-rpc-python
 
