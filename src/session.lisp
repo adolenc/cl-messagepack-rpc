@@ -20,28 +20,31 @@
 (define-rpc-type notification 2 method params)
 
 
-(defmethod callback-handler ((session session) data)
+(defmethod callback-handler ((session session) bytes)
+  "Decode messages from BYTES and call ON-MESSAGE with the decoded data. This
+method gets registered with SESSION's event-loop as the default callback
+handler."
   (let ((mpk:*decoder-prefers-lists* T)
         (mpk:*extended-types* (extended-types session))
         (mpk:*lookup-table* (lookup-table session)))
-    ; DATA may contain multiple messages so we need to properly split it up and
-    ; evaluate each one separately.
-    (flexi-streams:with-input-from-sequence (stream data)
+    ; BYTES may contain multiple messages so we need to properly split it up
+    ; and evaluate each one separately.
+    (flexi-streams:with-input-from-sequence (stream bytes)
       (while (listen stream)
         (on-message session (mpk:decode-stream stream))))))
 
 (defmethod register-callback ((session session) method callback)
-  "Register a callback which will get called when server/client sends
-   request or notification for method."
+  "Register a CALLBACK which will get called when server/client sends
+request or notification for METHOD."
   (setf (gethash method (callbacks session)) callback))
 
 (defmethod remove-callback ((session session) method)
-  "Remove a registered callback."
+  "Remove a registered callback with name METHOD."
   (remhash method (callbacks session)))
 
 
 (defmethod call-async ((session session) method &rest params)
-  "Use session to call server's method with specified params and immediately
+  "Use session to call server's METHOD with specified PARAMS and immediately
 pass control back to the caller, returning a future object. If you want to
 later check the results, use JOIN on the future."
   (let* ((id (get-unique-request-id))
@@ -51,7 +54,7 @@ later check the results, use JOIN on the future."
     future))
 
 (defmethod call ((session session) method &rest params)
-  "Invoke call-async with the specified arguments, and call join on the
+  "Invoke CALL-ASYNC with the specified arguments, and call JOIN on the
 returned future. This call thus blocks the thread until response from the
 server is received."
   (join (apply #'call-async session method params)))
@@ -61,7 +64,7 @@ server is received."
   (apply #'call session method params))
 
 (defmethod notify ((session session) method &rest params)
-  "Use session to call server's method with specified params, immediately
+  "Use SESSION to call server's METHOD with specified PARAMS, immediately
 returning control to the caller. This call completely ignores server
 responses."
   (send-notification session method (or params #()))
@@ -101,6 +104,7 @@ active-requests of the session with the received result or error."
       (finish future :error error :result result))))
 
 (defmethod on-notification ((session session) &key method params)
-  "Handle a new notification from the server by calling the appropriate callback."
+  "Handle a new notification from the server by calling the appropriate
+ callback."
   (handler-case (apply-callback session method params)
     (error ()))) ; We just ignore any errors when it comes to notifications

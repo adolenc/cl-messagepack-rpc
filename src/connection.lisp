@@ -49,8 +49,8 @@ new data when it is available."
     (as:tcp-connect host port #'(lambda (s d) (funcall callback d)) :event-cb #'on-connection-close)))
 
 
-(defgeneric send (event-base socket msg)
-  (:documentation "Send MSG via SOCKET using EVENT-BASE event-loop"))
+(defgeneric send (event-base socket bytes)
+  (:documentation "Send BYTES via SOCKET using EVENT-BASE event-loop"))
 
 (defmethod send ((event-base as::event-base) (socket as::socket) msg)
   ; Sending via cl-async's socket - i.e. pipe or tcp
