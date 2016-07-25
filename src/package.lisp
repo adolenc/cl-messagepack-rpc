@@ -51,9 +51,6 @@
         #:messagepack-rpc.utils
         #:messagepack-rpc.conditions
         #:messagepack-rpc.event-loop)
-  ;; cl-messagepack
-  (:export #:define-extension-types
-           #:*extended-types*)
   ;; conditions
   (:export #:rpc-error
            #:transport-error
