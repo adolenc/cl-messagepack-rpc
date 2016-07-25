@@ -22,6 +22,27 @@
   (mrpc:notify *client* "push_to_register" NIL)
   (is (equal '(1 "test" NIL T) (mrpc:call *client* "push_to_register" T))))
 
+(test ext-type-equality
+  (let ((*client* (apply #'make-instance 'mrpc:client
+                         (append (first *connections*)
+                                 (list :extended-types '(1 ExtClass1 ExtClass2))))))
+    (is (eq (mrpc:call *client* "get_ext_type" 1 0)
+            (mrpc:call *client* "get_ext_type" 1 0)))
+    (is (eq (mrpc:call *client* "get_ext_type" 1 1)
+            (mrpc:call *client* "get_ext_type" 1 1)))
+    (is (eq (mrpc:call *client* "get_ext_type" 2 0)
+            (mrpc:call *client* "get_ext_type" 2 0)))
+    (is (eq (mrpc:call *client* "get_ext_type" 2 1)
+            (mrpc:call *client* "get_ext_type" 2 1)))
+    (is (not (eq (mrpc:call *client* "get_ext_type" 1 0)
+                 (mrpc:call *client* "get_ext_type" 1 1))))
+    (is (not (eq (mrpc:call *client* "get_ext_type" 2 0)
+                 (mrpc:call *client* "get_ext_type" 2 1))))
+    (is (not (eq (mrpc:call *client* "get_ext_type" 1 0)
+                 (mrpc:call *client* "get_ext_type" 2 0))))
+    (let ((ext1 (mrpc:call *client* "get_ext_type" 1 0)))
+      (is (eq ext1 (mrpc:call *client* "id" ext1))))))
+
 (test-client raise-error
   (signals mrpc:rpc-error (mrpc:call *client* "raise_error")))
 

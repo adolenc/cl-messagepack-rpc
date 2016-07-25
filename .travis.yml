@@ -28,6 +28,8 @@ before_install:
       make check
     fi
   - cd $HOME/libuv-v1.9.1 && sudo make install && cd $HOME/build/adolenc/cl-messagepack-rpc
+  # Use latest cl-messagepack
+  - git clone https://github.com/mbrezu/cl-messagepack $HOME/lisp/cl-messagepack
   # Install msgpackrpc package for python server
   - pip install --user msgpack-rpc-python
 

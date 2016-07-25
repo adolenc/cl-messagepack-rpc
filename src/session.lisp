@@ -11,6 +11,8 @@
   ((event-loop :initform (el:init) :initarg :event-loop :accessor event-loop)
    (socket :initform NIL :accessor socket)
    (callbacks :initform (make-hash-table :test 'equal) :accessor callbacks)
+   (extended-types :initform '() :accessor extended-types)
+   (lookup-table :initform (mpk:make-lookup-table) :accessor lookup-table) ; for eq between ext objects
    (active-requests :initform (make-hash-table) :accessor active-requests)))
 
 (define-rpc-type request 0 id method params)
@@ -19,7 +21,9 @@
 
 
 (defmethod callback-handler ((session session) data)
-  (let ((mpk:*decoder-prefers-lists* T))
+  (let ((mpk:*decoder-prefers-lists* T)
+        (mpk:*extended-types* (extended-types session))
+        (mpk:*lookup-table* (lookup-table session)))
     ; DATA may contain multiple messages so we need to properly split it up and
     ; evaluate each one separately.
     (flexi-streams:with-input-from-sequence (stream data)

@@ -1,6 +1,7 @@
 # Taken and adapted from https://github.com/msgpack-rpc/msgpack-rpc-python/blob/master/test/test_msgpackrpc.py
 from time import sleep
 import signal, sys, threading
+import msgpack
 import msgpackrpc
 from msgpackrpc import error
 
@@ -24,6 +25,12 @@ class TestServer(object):
     def clear_register(self):
         self.register_ = []
         return True
+
+    def get_ext_type(self, id, data):
+        return msgpack.ExtType(id, str(data))
+
+    def id(self, x):
+        return x
 
     def raise_error(self):
         raise Exception('error')
