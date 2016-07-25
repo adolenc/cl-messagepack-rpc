@@ -16,7 +16,7 @@ Package is available through [Quicklisp](https://www.quicklisp.org/), so simply 
 
 from your REPL should properly load all the dependencies and cl-messagepack-rpc itself.
 
-In order to get cl-async working, you will however also need `libuv1-dev` package, which you can install using your distribution's package manager.
+In order to get cl-async working, you will however also need `libuv1-dev` package, which you can install using your distribution's package manager, or by manually compiling [libuv](https://github.com/libuv/libuv#build-instructions).
 
 ## Usage
 This library tries to follow the official specification as closely as possible. For a quick taste:
@@ -43,20 +43,23 @@ This library tries to follow the official specification as closely as possible. 
 
 ## Exported symbols
 
-#### \*extended-types\*
-Export of [\*extended-types\* parameter from cl-mesasgepack](https://github.com/mbrezu/cl-messagepack#extended-types).
-
-#### session
-Class serving as a superclass to client. 
-
 #### client (session)
 Main class used to connect to an already running server. You can specify which means of transport the server uses via `make-instance` call:
 ```common-lisp
 (defparameter *client*  (make-instance 'client :host "127.0.0.1" :port 1985)) ; to connect via TCP
 (defparameter *client2* (make-instance 'client :file "/path/to/named/pipe")) ; to connect via named pipe
 (defparameter *client3* (make-instance 'client)) ; to connect via standard input/output
-(defparameter *client4* (make-instance 'client :input-stream *standard-input* :output-stream *output-stream*)) ; same as above, but can be used for any (binary) input and output streams
+(defparameter *client4* (make-instance 'client :input-stream *standard-input*
+                                               :output-stream *output-stream*))
+  ; *client4* is same as *client3*, but note that you can specify any (binary) input and output streams
 ```
+
+If remote server uses extended types, you can specify that by passing a [specification list](https://github.com/mbrezu/cl-messagepack#extended-types) via `:extended-types` argument to #'make-instance. For example, to translate the use case from [cl-messagepack's readme](https://github.com/mbrezu/cl-messagepack#extended-types), you would use:
+```common-lisp
+(defparameter *client* (make-instance 'client :host "127.0.0.1" :port 1985)
+                                              :extended-types '(:numeric 0 Buffer Window Tabpage))
+```
+Objects of extended type can be tested for equality using `#'eq`.
 
 #### register-callback (session method callback)
 Register a CALLBACK with name METHOD for some SESSION. Callback should be something callable:
