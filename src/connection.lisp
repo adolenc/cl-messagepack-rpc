@@ -14,15 +14,15 @@ otherwise sometimes refuses to work."
   (clean as::*event-base* "Connection closed!"))
 
 
-(defparameter *read-interval* 0.001 "Elapsed time in seconds between two consecutive reads for connect-stream")
+(defvar *default-pooling-rate* 0.001 "Elapsed time in seconds between two consecutive reads for connect-stream")
 
-(defun connect-stream (event-base callback &key (input-stream *standard-input*) (output-stream *standard-output*))
+(defun connect-stream (event-base callback &key (input-stream *standard-input*) (output-stream *standard-output*) (pooling-rate *default-pooling-rate*))
   "Establish a connection on top of event-base via input and output streams,
 calling CALLBACK with new data when it is available."
   (labels ((collect-input ()
              "Block thread until data is available on input-stream and retrieve it."
              (loop until (listen input-stream)
-                   do (sleep *read-interval*)
+                   do (sleep pooling-rate)
                    finally (return (loop while (listen input-stream)
                                          collect (read-byte input-stream))))))
     (with-event-loop-bindings (event-base)
