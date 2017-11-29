@@ -7,6 +7,7 @@
                #:cl-libuv
                #:cffi
                #:flexi-streams
+               #:trivial-backtrace
                #:alexandria)
   :serial t
   :components ((:file "src/package")

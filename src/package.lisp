@@ -48,6 +48,7 @@
         #:messagepack
         #:flexi-streams
         #:alexandria
+        #:trivial-backtrace
         #:messagepack-rpc.utils
         #:messagepack-rpc.conditions
         #:messagepack-rpc.event-loop)

@@ -92,8 +92,8 @@ responding with its return value if the call is successful, or catch the
 error and respond with it."
   (handler-bind ((error #'(lambda (desc)
                          (send-response session id
-                                        (format NIL "'~A' method: ~A~%~{ > ~A~%~}"
-                                                method desc (SB-DEBUG:BACKTRACE-AS-LIST))
+                                        (format NIL "'~A' method: ~A~%~A"
+                                                method desc (print-backtrace desc :output nil))
                                         NIL))))
     (send-response session id NIL (apply-callback session method params))))
 
