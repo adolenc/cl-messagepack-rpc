@@ -55,9 +55,6 @@
 (test-client async-result
   (is (string= "You are async!" (mrpc:call *client* "async_result"))))
 
-(test bad-connection
-  (signals mrpc:transport-error (make-instance 'mrpc:client :host "127.0.0.1" :port 0)))
-
 (defun random-element (list)
   "Return random element from the list."
   (nth (random (length list)) list))

@@ -9,7 +9,7 @@
       'as::event-base
       :c loop-pointer
       :id 0  ; TODO: should id change for each new loop?
-      :catch-app-errors NIL
+      :catch-app-errors t
       :send-errors-to-eventcb T)))
 
 (defun run-once (event-base)
